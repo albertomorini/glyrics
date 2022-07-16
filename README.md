@@ -25,7 +25,7 @@ It's mainly made for iTunes/Apple Music/iPhoneMusic, works only with M4A and MP3
 	- mutagen
 
 **Some pics** (more into imgExample/)
-![Output](https://github.com/albertomorini/albertomorini/blob/main/glyrics/imgExample/github1.gif)
+![Output](https://github.com/albertomorini/glyrics/blob/main/imgExample/github1.gif)
 
 
 ## How it works
@@ -59,7 +59,7 @@ Why? Because can brings us different results.
 
 2) We can't do a self glyrics for MP3, because it's an awful format cause doesn't have a defined single tag like M4A ("©lyr"), MP3 has "USLT:desc:eng".. Maybe we can use a regular expression "USLT*" to search the tag. *Working on it*
 
-![Output](https://github.com/albertomorini/albertomorini/blob/main/glyrics/imgExample/problem_mp3Tag.png)
+![Output](https://github.com/albertomorini/glyrics/blob/main/imgExample/problem_mp3Tag.png)
 
 
 ## TODO
