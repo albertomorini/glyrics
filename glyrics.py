@@ -11,7 +11,6 @@ APIkey_genius= "Fbn65vLE84Ji1Le4hZaZmjXbsUHrvV64ZgLdml3qEcwIMr8z0cPj6dBL8fDy_TJE
 genius = genius.Genius(APIkey_genius)
 genius.skip_non_songs = False #we search also the songs without lyrics (eg soundtrack) in the way to mark them as founded (already searched).
 
-sys.path.insert(0, '../+utility/')
 import python_utility as pyut
 
 
@@ -46,7 +45,7 @@ def storeLyricsMP3(pathSong, lyrics):
 def flushLyrics(path):
 	x = str(input("Insert 'suRe' if you're really sure"))
 	if (x=='suRe'):
-		
+
 		for root, directories, files in os.walk(path, topdown=True):
 			for name in files:
 				pathTmp=str(os.path.join(root, name))
@@ -81,11 +80,11 @@ def scanFolder(path):
 	for root, directories, files in os.walk(path, topdown=True):
 		for name in files:
 
-			pathTmp=str(os.path.join(root, name))	
+			pathTmp=str(os.path.join(root, name))
 
 			if(pyut.doHashMD5(pathTmp) not in dictSongs.get("alreadySearched")):
 			#song is never been searched or it's never found the lyrics
-				
+
 				if(pathTmp.endswith(".m4a")):
 					dictSongs["numM4A"]+=1
 					lyrics = searchLyrics(pathTmp)
