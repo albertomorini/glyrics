@@ -1,13 +1,36 @@
 # Glyrics lyrics for Apple Music
 
-Glyrics scans your songs and for each one, will search the lyrics on genius.com, retrieve the lyrics and store into the song file.
+Glyrics allow you to store the genius.com lyrics into your songs.
 
-**Works**: with M4A and MP3, mainly made for iTunes/Apple Music/iPhoneMusic.
+## IDEA
 
-## Requirements:
+Was mainly made for iTunes/Apple Music/iPhoneMusic, insted of copy and paste inside the lyrics of songs, you can do automatically.
+
+**Works only with mp3 and m4a**
+
+
+### Some pics
+![Output](./imgExample/github1.gif)
+
+## Flow
+
+1) glyrics.py -> works with M4A and MP3 files, for each song check into a self registry (glyrics.json) if the song is already searched and founded, avoiding useless searches for songs that already have a lyrics.
+	- if glyrics found the lyrics, it will store into the song file then do the MD5 of song's name and store into the registry
+
+2) glyricsSelf.py -> works **only** with M4a, checking if the tag "©lyr" is empty or not, then it search etc..
+	- not with mp3 because mp3 use differents tag (see problems chapter)
+
+<hr/>
+
+## Usage:
+`$ python3 glyrics.py mode "path"`
+	- mode = "search" for search/add lyrics, "flush" for delete the existing lyrics
+	- path is the path to your music folder (is recursive, found every song stored in every subfolder) like /Media/Music/...
+
+
+### Requirements:
 
 - is required a good folder's structure, like iTunes does:
-
 > 	
 	artist1/
 		album1/
@@ -16,33 +39,14 @@ Glyrics scans your songs and for each one, will search the lyrics on genius.com,
 	  	album1/
 	....
 
-- Python3 and some libraries:
+- Python3 with:
 	- os
 	- sys
 	- lyricsgenius
 	- tinytag
 	- mutagen
 
-**Some pics** (more into imgExample/)
-![Output](https://github.com/albertomorini/glyrics/blob/main/imgExample/github1.gif)
-
-
-## How it works
-
-1) glyrics.py -> works with M4A and MP3, for each song check if previously has been found the lyrics searching into glyrics.json, a 'preferences' file created the first time you run glyrics, into the file is stored the MD5 of all the songs that glyrics has found.
-So, we don't check if the song has already a tag for lyrics, we just compute the MD5 and check into our little 'database'.
-
-2) glyricsSelf.py -> works only with M4A, for each song check if there's an existing lyrics stored (checking the tag "©lyr"), if not it will search etc.
-
-**GENIUS API KEY**
-
-You need one to use genius, I provided mine, isn't a security problem in my opinion, it allows you just to download/search lyrics.
-
-## Usage:
-
-`$ python3 glyrics.py mode "path"`
-	- mode = "search" for search/add lyrics, "flush" for delete the existing lyrics
-	- path is the path to your music folder (is recursive, found every song stored in every subfolder) like /Media/Music/...
+<hr/>
 
 ## PROBLEMS:
 
@@ -58,8 +62,8 @@ Why? Because can brings us different results.
 
 2) We can't do a self glyrics for MP3, because it's an awful format cause doesn't have a defined single tag like M4A ("©lyr"), MP3 has "USLT:desc:eng".. Maybe we can use a regular expression "USLT*" to search the tag. *Working on it*
 
-![Output](https://github.com/albertomorini/glyrics/blob/main/imgExample/problem_mp3Tag.png)
+![Output](imgExample/problem_mp3Tag.png)
 
 
-## TODO
+### TODO
 - [ ] correct the artist/title tags, eg. artist="Drake & Kanye West" song="Glow" is wrong, because the artist is "Drake" and the song is "Glow (feat. Kanye West)".. so search on genius the song get the righ info.
