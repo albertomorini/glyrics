@@ -1,6 +1,6 @@
 # Glyrics lyrics for Apple Music
 
-Glyrics allow you to store the genius.com lyrics into your songs.
+Glyrics allow you to store the <a hfref="genius.com">genius</a> lyrics into your songs.
 
 ## IDEA
 
