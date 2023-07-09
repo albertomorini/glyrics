@@ -17,7 +17,7 @@ genius.skip_non_songs = False #we search also the songs without lyrics (eg sound
 # UTILITY
 
 def serializeJSON(dir, filename, dataDictionary):
-	with open(dir+"/"+filename,"a", encoding='utf-8') as fileToStore:
+	with open(dir+"/"+filename,"w", encoding='utf-8') as fileToStore:
    		json.dump(dataDictionary, fileToStore, ensure_ascii=False)
 
 def readJson(path):
@@ -101,15 +101,13 @@ def scanFolder(path):
 				lyrics = searchLyrics(pathTmp)
 				if(pathTmp.endswith(".m4a")): 
 					dictSongs["numM4A"]+=1
-					if(lyrics!=None): #lyrics found, store and save the hash of song (to avoid a rescan)
-						if(storeLyricsM4A(pathTmp,lyrics)):
-							dictSongs.get("alreadySearched").append(doMD5(pathTmp))
+					if(lyrics!=None and storeLyricsM4A(pathTmp,lyrics)): #lyrics found, store and save the hash of song (to avoid a rescan)
+						dictSongs.get("alreadySearched").append(doMD5(pathTmp))
 
 				elif(pathTmp.endswith(".mp3")):
 					dictSongs["numMP3"]+=1
-					if(lyrics!=None): #lyrics found, store and save the hash of song (to avoid a rescan)
-						if(storeLyricsMP3(pathTmp,lyrics)):
-							dictSongs.get("alreadySearched").append(doMD5(pathTmp))
+					if(lyrics!=None and storeLyricsMP3(pathTmp,lyrics)): #lyrics found, store and save the hash of song (to avoid a rescan)
+						dictSongs.get("alreadySearched").append(doMD5(pathTmp))
 
 	return dictSongs
 
