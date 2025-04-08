@@ -41,15 +41,23 @@ def searchLyrics(pathSong):
 
 #store the lyrics to the M4A song
 def storeLyricsM4A(pathSong, lyrics):
-	song = MP4(pathSong)
-	song["©lyr"] = lyrics
-	song.save()
+	try:
+		song = MP4(pathSong)
+		song["©lyr"] = lyrics
+		song.save()
+		return True
+	except Exception as e:
+		return False
 
 #store the lyrics to the MP3 song
 def storeLyricsMP3(pathSong, lyrics):
-	song = ID3(pathSong)
-	song["USLT::'eng'"] = (USLT(encoding=3, lang=u'eng', desc=u'desc', text=lyrics))
-	song.save()
+	try:
+		song = ID3(pathSong)
+		song["USLT::'eng'"] = (USLT(encoding=3, lang=u'eng', desc=u'desc', text=lyrics))
+		song.save()
+		return True
+	except Exception as e:
+		return False
 
 ########################################################################
 
@@ -94,14 +102,14 @@ def scanFolder(path):
 				if(pathTmp.endswith(".m4a")): 
 					dictSongs["numM4A"]+=1
 					if(lyrics!=None): #lyrics found, store and save the hash of song (to avoid a rescan)
-						storeLyricsM4A(pathTmp,lyrics)
-						dictSongs.get("alreadySearched").append(doMD5(pathTmp))
+						if(storeLyricsM4A(pathTmp,lyrics)):
+							dictSongs.get("alreadySearched").append(doMD5(pathTmp))
 
 				elif(pathTmp.endswith(".mp3")):
 					dictSongs["numMP3"]+=1
 					if(lyrics!=None): #lyrics found, store and save the hash of song (to avoid a rescan)
-						storeLyricsMP3(pathTmp,lyrics)
-						dictSongs.get("alreadySearched").append(doMD5(pathTmp))
+						if(storeLyricsMP3(pathTmp,lyrics)):
+							dictSongs.get("alreadySearched").append(doMD5(pathTmp))
 
 	return dictSongs
 
