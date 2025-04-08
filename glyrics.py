@@ -4,7 +4,7 @@ import lyricsgenius as genius
 from tinytag import TinyTag
 from mutagen.mp4 import MP4
 from mutagen.mp3 import MP3
-from mutagen.id3 import ID3, TIT2, TALB, TPE1, TPE2, COMM, USLT, TCOM, TCON, TDRC
+from mutagen.id3 import ID3, USLT
 import hashlib
 import json
 
@@ -21,9 +21,13 @@ def serializeJSON(dir, filename, dataDictionary):
    		json.dump(dataDictionary, fileToStore, ensure_ascii=False)
 
 def readJson(path):
-	with open(path) as dataStored:
-		return json.load(dataStored)
-	
+	try:
+		with open(path) as dataStored:
+			return json.load(dataStored)
+	except Exception as e:
+		print("Exception: config file not exists/not a json")
+		return None
+
 def doMD5(digest):
 	return hashlib.md5(digest.encode()).hexdigest()
 
