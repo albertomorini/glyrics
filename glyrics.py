@@ -45,7 +45,6 @@ def storeLyricsMP3(pathSong, lyrics):
 def flushLyrics(path):
 	x = str(input("Insert 'suRe' if you're really sure"))
 	if (x=='suRe'):
-
 		for root, directories, files in os.walk(path, topdown=True):
 			for name in files:
 				pathTmp=str(os.path.join(root, name))
@@ -101,6 +100,7 @@ def scanFolder(path):
 
 	return dictSongs
 
+#############################################################################
 #start the program, let choose two option: "Flush" -> erease the previous lyrics, "search" -> scan the folder
 def main():
 	if(len(sys.argv)>1):

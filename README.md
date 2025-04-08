@@ -1,9 +1,8 @@
 # Glyrics lyrics for Apple Music
 
-glyrics scans your music's directory and next, for each song will search the lyrics on genius.com (searching by the info retrieved from tags title and artist).
-Found the lyrics? Store it into the song.
+Glyrics scans your songs and for each one, will search the lyrics on genius.com, retrieve the lyrics and store into the song file.
 
-It's mainly made for iTunes/Apple Music/iPhoneMusic, works only with M4A and MP3 audio.
+**Works**: with M4A and MP3, mainly made for iTunes/Apple Music/iPhoneMusic.
 
 ## Requirements:
 
