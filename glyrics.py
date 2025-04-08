@@ -99,7 +99,7 @@ def scanFolder(path):
 			if(doMD5(pathTmp) not in dictSongs.get("alreadySearched")): #if song is never been searched or hasn't got lyrics
 
 				lyrics = searchLyrics(pathTmp)
-				if(pathTmp.endswith(".m4a")): 
+				if(pathTmp.endswith(".m4a")):
 					dictSongs["numM4A"]+=1
 					if(lyrics!=None and storeLyricsM4A(pathTmp,lyrics)): #lyrics found, store and save the hash of song (to avoid a rescan)
 						dictSongs.get("alreadySearched").append(doMD5(pathTmp))
