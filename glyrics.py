@@ -5,17 +5,15 @@ from tinytag import TinyTag
 from mutagen.mp4 import MP4
 from mutagen.mp3 import MP3
 from mutagen.id3 import ID3, TIT2, TALB, TPE1, TPE2, COMM, USLT, TCOM, TCON, TDRC
+import python_utility as pyut
 
-
-APIkey_genius= "Fbn65vLE84Ji1Le4hZaZmjXbsUHrvV64ZgLdml3qEcwIMr8z0cPj6dBL8fDy_TJE"
+## GENIUS STUFF
+APIkey_genius= open("./genius_APIKEY.txt","r").read()
 genius = genius.Genius(APIkey_genius)
 genius.skip_non_songs = False #we search also the songs without lyrics (eg soundtrack) in the way to mark them as founded (already searched).
 
-import python_utility as pyut
-
-
 ########################################################################
-#
+
 #return None if the lyrics isn't found, could be because the songs hasn't enough info (title, artist)
 def searchLyrics(pathSong):
 	try:
@@ -57,44 +55,36 @@ def flushLyrics(path):
 					song.pop("USLT::'eng'")
 					song.save()
 
-#search a previous configuration, if there isn't will create a new one
-def checkJson(path):
+#search a previous registry of song searched, if there isn't will create a new one
+def checkRegistry(path):
 	pref = pyut.read_JSON(path)
-	if(pref!=None):
-		return pref
-	else:
-		dictSongs = {
+	if(pref==None):
+		pref = {
 			"alreadySearched": [],
 			"numMP3":0,
 			"numM4A":0
 		}
-		return dictSongs
+	return pref
 
 
 #process each song by searching and saving the lyrics
 def scanFolder(path):
-
-	dictSongs = checkJson(path+"/glyrics.json") #configuration file, stored on @param path
-
+	dictSongs = checkRegistry(path+"/glyrics.json") #configuration file, stored on @param path
 	for root, directories, files in os.walk(path, topdown=True):
 		for name in files:
-
 			pathTmp=str(os.path.join(root, name))
+			if(pyut.doHashMD5(pathTmp) not in dictSongs.get("alreadySearched")): #if song is never been searched or hasn't got lyrics
 
-			if(pyut.doHashMD5(pathTmp) not in dictSongs.get("alreadySearched")):
-			#song is never been searched or it's never found the lyrics
-
-				if(pathTmp.endswith(".m4a")):
+				lyrics = searchLyrics(pathTmp)
+				if(pathTmp.endswith(".m4a")): 
 					dictSongs["numM4A"]+=1
-					lyrics = searchLyrics(pathTmp)
-					if(lyrics!=None):
+					if(lyrics!=None): #lyrics found, store and save the hash of song (to avoid a rescan)
 						storeLyricsM4A(pathTmp,lyrics)
 						dictSongs.get("alreadySearched").append(pyut.doHashMD5(pathTmp))
 
 				elif(pathTmp.endswith(".mp3")):
 					dictSongs["numMP3"]+=1
-					lyrics = searchLyrics(pathTmp)
-					if(lyrics!=None):
+					if(lyrics!=None): #lyrics found, store and save the hash of song (to avoid a rescan)
 						storeLyricsMP3(pathTmp,lyrics)
 						dictSongs.get("alreadySearched").append(pyut.doHashMD5(pathTmp))
 
@@ -109,11 +99,9 @@ def main():
 		if(sys.argv[1]=="search"):
 			dictSongs = scanFolder(sys.argv[2])
 			print(dictSongs)
-
 			pyut.serialize_JSON(sys.argv[2],"glyrics.json",dictSongs)
 			print("Done!")
 	else:
 		"function directory"
-
 
 main()

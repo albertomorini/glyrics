@@ -4,7 +4,8 @@ import lyricsgenius as genius
 from tinytag import TinyTag
 from mutagen.mp4 import MP4
 
-APIkey_genius= "Fbn65vLE84Ji1Le4hZaZmjXbsUHrvV64ZgLdml3qEcwIMr8z0cPj6dBL8fDy_TJE"
+## GENIUS STUFF
+APIkey_genius= open("./genius_APIKEY.txt","r").read()
 genius = genius.Genius(APIkey_genius)
 genius.skip_non_songs = False #we search also the songs without lyrics (eg soundtrack) in the way to mark them as founded (already searched).
 
