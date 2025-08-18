@@ -1,12 +1,18 @@
-# Glyrics lyrics for Apple Music
+# Glyrics ~ a lyrics injector for your music library
 
 Glyrics allow you to store the <a hfref="genius.com">genius</a> lyrics into your songs.
 
 ## IDEA
 
-Was mainly made for iTunes/Apple Music/iPhoneMusic, insted of copy and paste inside the lyrics of songs, you can do automatically.
+This project works with every music library as least is well formatted.
+<br/>
+Tested with success in:
+- Apple Music (iTunes, iPhone, Mac and so)
+- Jellyfin
+- Plex
+- Auxio/Phocid Android
 
-**Works only with mp3 and m4a**
+**Works only with mp3 and m4a files**
 
 
 ### Some pics
