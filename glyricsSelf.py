@@ -82,13 +82,23 @@ def processFolder(path):
 
 ########################################################################
 
-if(len(sys.argv)>1):
-	if(sys.argv[1]=="Flush"):
-		flushLyrics(sys.argv[2])
-	if(sys.argv[1]=="search"):
-		dictSongs = processFolder(sys.argv[2])
-		print(dictSongs)
-		print("Done!")
-else:
-	"function directory"
+def main():
+	if(len(sys.argv)>1):
+		if(sys.argv[1].upper()=="FLUSH"):
+			flushLyrics(sys.argv[2])
+		elif(sys.argv[1].upper()=="SEARCH"):
+			dictSongs = scanFolder(sys.argv[2])
+			print(dictSongs)
+			serializeJSON(sys.argv[2],"glyrics.json",dictSongs)
+			print("Done!")
+	else:
+		print("Searching for a default configuration...")
+		try:
+			config = open(".config.txt","r")
+			print("Configuration founded! Loading it")
+			scanFolder(config.read().rstrip()) ##give the path to the scan folder
+		except Exception:
+			print("No file '.config.txt' with a path founded")
+			print("Try to run with $python3 glyrics.py Flush/Search $Path")
 
+main()
