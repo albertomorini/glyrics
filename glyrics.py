@@ -68,19 +68,25 @@ def storeLyricsMP3(pathSong, lyrics):
 
 #DANGER: erase the lyrics of the songs
 def flushLyrics(path):
-	x = str(input("Insert 'suRe' if you're really sure"))
+	x = str(input("Insert 'suRe' if you're really sure\n"))
 	if (x=='suRe'):
 		for root, directories, files in os.walk(path, topdown=True):
 			for name in files:
 				pathTmp=str(os.path.join(root, name))
-				if(pathTmp.endswith(".m4a")):
-					song = MP4(pathTmp)
-					song.pop("©lyr")
-					song.save()
-				elif(pathTmp.endswith(".mp3")):
-					song = ID3(i)
-					song.pop("USLT::'eng'")
-					song.save()
+				try:
+					if(pathTmp.endswith(".m4a")):
+						song = MP4(pathTmp)
+						song.pop("©lyr")
+						song.save()
+						print("Removed lyrics for :",name)
+					elif(pathTmp.endswith(".mp3")):
+						song = ID3(i)
+						song.pop("USLT::'eng'")
+						song.save()
+						print("Removed lyrics for :",name)
+					
+				except Exception as e: ## whenever a single song do not have the lyrics we will skip it
+					pass
 
 #search a previous registry of song searched, if there isn't will create a new one
 def checkRegistry(path):
