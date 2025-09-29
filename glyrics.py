@@ -17,21 +17,23 @@ genius.skip_non_songs = False #we search also the songs without lyrics (eg sound
 # UTILITY
 
 def serializeJSON(dir, filename, dataDictionary):
-	with open(dir+"/"+filename,"w", encoding='utf-8') as fileToStore:
-   		json.dump(dataDictionary, fileToStore, ensure_ascii=False)
+	f_handler = open(dir+"/"+filename,"w",encoding="utf-8")
+	f_handler.write(json.dumps(dataDictionary))
+	f_handler.close()
 
 def readJson(path):
 	try:
-		with open(path) as dataStored:
-			return json.load(dataStored)
+		jfile = open(path,"r")
+		return json.loads(jfile.read())
 	except Exception as e:
 		print("Exception: config file not exists/not a json")
 		return None
 
-def doMD5(digest):
-	return hashlib.md5(digest.encode()).hexdigest()
+def doMD5(str_value):
+	return hashlib.md5(str_value.encode('utf-8')).hexdigest()
 
 ########################################################################
+# GENIUS INTEGRATION AND FILE MANAGEMENT
 
 #return None if the lyrics isn't found, could be because the songs hasn't enough info (title, artist)
 def searchLyrics(pathSong):
@@ -64,7 +66,7 @@ def storeLyricsMP3(pathSong, lyrics):
 		return False
 
 ########################################################################
-
+## LOGIC AND ALGORITHM
 
 #DANGER: erase the lyrics of the songs
 def flushLyrics(path):
@@ -89,8 +91,8 @@ def flushLyrics(path):
 					pass
 
 #search a previous registry of song searched, if there isn't will create a new one
-def checkRegistry(path):
-	pref = readJson(path)
+def checkRegistry(path, filename):
+	pref = readJson(os.path.join(path,filename))
 	if(pref==None):
 		pref = {
 			"alreadySearched": [],
@@ -102,12 +104,11 @@ def checkRegistry(path):
 
 #process each song by searching and saving the lyrics
 def scanFolder(path):
-	dictSongs = checkRegistry(path+"/glyrics.json") #configuration file, stored on @param path
+	dictSongs = checkRegistry(path, "glyrics.json") #configuration file, stored on @param path
 	for root, directories, files in os.walk(path, topdown=True):
 		for name in files:
 			pathTmp=str(os.path.join(root, name))
-			if(doMD5(pathTmp) not in dictSongs.get("alreadySearched")): #if song is never been searched or hasn't got lyrics
-
+			if(str(doMD5(pathTmp)) not in dictSongs.get("alreadySearched") and name[0]!='.'): #if song is never been searched or hasn't got lyrics and file is not a hidden one
 				lyrics = searchLyrics(pathTmp)
 				if(pathTmp.endswith(".m4a")):
 					dictSongs["numM4A"]+=1

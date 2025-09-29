@@ -50,7 +50,7 @@ def flushLyrics(path):
 			for name in files:
 				pathTmp=str(os.path.join(root, name))
 				try:
-					if(pathTmp.endswith(".m4a")):
+					if(pathTmp.endswith(".m4a") and name[0]!="."): ## to exclude hidden file
 						song = MP4(pathTmp)
 						song.pop("©lyr")
 						song.save()
