@@ -65,6 +65,15 @@ def storeLyricsMP3(pathSong, lyrics):
 	except Exception as e:
 		return False
 
+def storeLyricsFLAC(pathSong,lyricstxt):
+	try:
+		song = MP4(pathSong)
+		song["LYRICS"] = lyricstxt
+		song.save()
+		return True
+	except Exception as e:
+		return False
+
 ########################################################################
 ## LOGIC AND ALGORITHM
 
@@ -79,6 +88,11 @@ def flushLyrics(path):
 					if(pathTmp.endswith(".m4a")):
 						song = MP4(pathTmp)
 						song.pop("©lyr")
+						song.save()
+						print("Removed lyrics for :",name)
+					elif(pathTmp.endswith(".flac")):
+						song = MP4(pathTmp)
+						song.pop("LYRICS")
 						song.save()
 						print("Removed lyrics for :",name)
 					elif(pathTmp.endswith(".mp3")):
@@ -108,16 +122,21 @@ def scanFolder(path):
 	for root, directories, files in os.walk(path, topdown=True):
 		for name in files:
 			pathTmp=str(os.path.join(root, name))
-			if(str(doMD5(pathTmp)) not in dictSongs.get("alreadySearched") and name[0]!='.'): #if song is never been searched or hasn't got lyrics and file is not a hidden one
-				lyrics = searchLyrics(pathTmp)
+			if(str(doMD5(pathTmp)) not in dictSongs.get("alreadySearched") and name[0]!='.'): #if song is never been searched or hasn't got lyricstxt and file is not a hidden one
+				lyricstxt = searchLyrics(pathTmp)
 				if(pathTmp.endswith(".m4a")):
 					dictSongs["numM4A"]+=1
-					if(lyrics!=None and storeLyricsM4A(pathTmp,lyrics)): #lyrics found, store and save the hash of song (to avoid a rescan)
+					if(lyricstxt!=None and storeLyricsM4A(pathTmp,lyricstxt)): #lyricstxt found, store and save the hash of song (to avoid a rescan)
+						dictSongs.get("alreadySearched").append(doMD5(pathTmp))
+
+				if(pathTmp.endswith(".flac")):
+					# dictSongs["numFLAC"]+=1 ## TODO: fix it
+					if(lyricstxt!=None and storeLyricsFLAC(pathTmp,lyricstxt)):
 						dictSongs.get("alreadySearched").append(doMD5(pathTmp))
 
 				elif(pathTmp.endswith(".mp3")):
 					dictSongs["numMP3"]+=1
-					if(lyrics!=None and storeLyricsMP3(pathTmp,lyrics)): #lyrics found, store and save the hash of song (to avoid a rescan)
+					if(lyricstxt!=None and storeLyricsMP3(pathTmp,lyricstxt)): #lyricstxt found, store and save the hash of song (to avoid a rescan)
 						dictSongs.get("alreadySearched").append(doMD5(pathTmp))
 
 	return dictSongs
@@ -144,3 +163,6 @@ def main():
 			print("Try to run with $python3 glyrics.py Flush/Search $Path")
 
 main()
+
+##TODO: beter store function, unified and use a switch to the cases format
+##TODO: review documentations
