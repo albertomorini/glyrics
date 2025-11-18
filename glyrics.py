@@ -138,7 +138,7 @@ def main():
 
 	if command == "FLUSH":
 		if (str(input("DANGER:: Insert 'suRe' if you're really sure\n"))=='suRe'):
-			flushLyrics(sys.argv[2])
+			scanFolder(sys.argv[2],True)
 	elif(sys.argv[1].upper()=="SEARCH"):
 		dictSongs = scanFolder(sys.argv[2])
 		print(dictSongs)

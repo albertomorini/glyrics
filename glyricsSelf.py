@@ -3,6 +3,7 @@ import sys
 import lyricsgenius as genius
 from tinytag import TinyTag
 from mutagen.mp4 import MP4
+from mutagen.flac import FLAC
 
 ## GENIUS STUFF
 APIkey_genius= open("./genius_APIKEY.txt","r").read()
@@ -22,78 +23,90 @@ def searchLyrics(pathSong):
 		return None
 
 #return True if the song has alreay a lyrics (means has already a lyrics tag)
-def lyricsExists(pathSong):
+def lyricsExists(song_path):
+	dummy_ext=song_path[-4:].lower() #just the extension
 	try:
-		song = MP4(pathSong)
-		if(song["©lyr"] != None): #if the tag exists we suppose that's already a lyrics
-			return True
-		else:
-			return False #has the tag but empty value
+		if(dummy_ext == ".m4a"):
+			song = MP4(song_path)
+			if(song["©lyr"]!= None):
+				return True
+		elif(dummy_ext == ".flac" and song["LYRICS"]!= None):
+			song = FLAC(song_path)
+			if(song["LYRICS"]!= None):
+				return True
+		return False
 	except Exception as e:
 		#the lyrics tag doesn't exists
 		return False
 
-#store the lyrics to the M4A song
-def storeLyricsM4A(pathSong, lyrics):
-	song = MP4(pathSong)
-	song["©lyr"] = lyrics
-	song.save()
+#store the lyrics into song tag
+def storeLyrics(song_path, song_lyrics_text):
+	dummy_ext=song_path[-4:].lower() #just the extension
+	try:
+		if(dummy_ext == ".m4a"):
+			song = MP4(song_path)
+			song["©lyr"] = song_lyrics_text
+			song.save()
+		elif(dummy_ext == ".flac"):
+			song = FLAC(song_path)
+			print(song)
+			song["LYRICS"] = song_lyrics_text
+			song.save()
+		return [True,dummy_ext]
+	except Exception as e:
+		print(e)
+		return [False,None]
+
 
 
 ########################################################################
 
 #DANGER: erase the lyrics of the songs
 def flushLyrics(path):
-	x = str(input("Insert 'suRe' if you're really sure\n"))
-	if (x=='suRe'):
-		for root, directories, files in os.walk(path, topdown=True):
-			for name in files:
-				pathTmp=str(os.path.join(root, name))
-				try:
-					if(pathTmp.endswith(".m4a") and name[0]!="."): ## to exclude hidden file
-						song = MP4(pathTmp)
-						song.pop("©lyr")
-						song.save()
-						print("Removed lyrics for :",name)
-				except Exception as e: ## whenever a single song do not have the lyrics we will skip it
-					pass
+	dummy_ext=song_path[-4:].lower() #just the extension
+	try:
+		if(dummy_ext == ".m4a"):
+			song = MP4(song_path)
+			song.pop("©lyr")
+			song.save()
+		elif(dummy_ext == ".flac"):
+			song = FLAC(song_path)
+			song.pop("LYRICS")
+			song.save()
+		return [True,dummy_ext]
+	except Exception as e:
+		print(e)
+		return [False,None]
 
-#return the paths of the songs that doesn't have a lyrics
-def processFolder(path):
 
-	dictSongs = {
-		"numSongs":0,
-		"lyricsAlreadyExists":0
-	}
-
+#process each song by searching and saving the lyrics
+def scanFolder(path,isFlush=False):
 	for root, directories, files in os.walk(path, topdown=True):
 		for name in files:
-			pathTmp=str(os.path.join(root, name))						
-			dictSongs["numSongs"]+=1
-			if(pathTmp.endswith(".m4a")): #TODO: and not in json already searched?
-
-				if (lyricsExists(pathTmp)):
-					dictSongs["lyricsAlreadyExists"]+=1
-				else:
-					lyrics = searchLyrics(pathTmp)
-					if(lyrics!=None):
-						storeLyricsM4A(pathTmp,lyrics)
-
-			#TODO: print(dictSongs["numSongs"]) -> for gui?? like "I'm on the n-th song of i dunno haven't scanned all yet ahah"
-	return dictSongs
+			song_path=str(os.path.join(root, name))
+			if(isFlush):
+				flushLyrics(song_path)
+			elif(not lyricsExists(song_path)): #if do not have the lyrics 
+				lyricstxt = searchLyrics(song_path)
+				res_store = storeLyrics(song_path,lyricstxt)
 
 
 ########################################################################
 
 def main():
-	if(len(sys.argv)>1):
-		if(sys.argv[1].upper()=="FLUSH"):
-			flushLyrics(sys.argv[2])
-		elif(sys.argv[1].upper()=="SEARCH"):
-			dictSongs = scanFolder(sys.argv[2])
-			print(dictSongs)
-			serializeJSON(sys.argv[2],"glyrics.json",dictSongs)
-			print("Done!")
+	if len(sys.argv) < 3:
+		print("Usage: python3 glyrics.py <Flush|Search> <FolderPath>")
+		return
+
+	command = sys.argv[1].upper()
+	folder_path = sys.argv[2]
+
+	if command == "FLUSH":
+		if (str(input("DANGER:: Insert 'suRe' if you're really sure\n"))=='suRe'):
+			scanFolder(sys.argv[2],True)
+	elif(sys.argv[1].upper()=="SEARCH"):
+		scanFolder(sys.argv[2])
+		print("Done!")
 	else:
 		print("Searching for a default configuration...")
 		try:
