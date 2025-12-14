@@ -149,7 +149,7 @@ def add_lyrics_directory(folder_path):
 				dummy_lyrics = get_lyrics_lyricsovh(s)
 				if(dummy_lyrics != None):
 					storing_res = store_lyrics2song(s,dummy_lyrics)
-					register.get("counter")[storing_res[1][-3:]] += 1 # remove the dot from the extension
+					register.get("counter")[get_extension(s).replace(".","",)] += 1 # remove the dot from the extension
 
 				if(dummy_lyrics != None and  len(dummy_lyrics)>1 and storing_res[0] and s_str not in register.get("lyrics_found")):
 					register.get("lyrics_found").append(s_str)
@@ -165,7 +165,7 @@ def add_lyrics_directory(folder_path):
 				register.get("lyrics_missing").append(s_str)
 		else: ## set as OK in the dicts, in order to avoid unuseful checks next time
 			register.get("lyrics_found").append(s_str)
-			register.get("counter")[get_extension(s)[-3:]] += 1 # remove the dot from the extension
+			register.get("counter")[get_extension(s).replace(".","",)] += 1 # remove the dot from the extension
 
 	store_register(register,folder_path)
 
