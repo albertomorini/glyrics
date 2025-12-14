@@ -1,5 +1,7 @@
 import sys
 import json
+import requests
+import urllib.parse
 from pathlib import Path
 from tinytag import TinyTag
 from mutagen.mp4 import MP4
@@ -48,11 +50,28 @@ def get_lyrics_genius(pathSong):
 	info = genius.search_song(metaData.title.split("(")[0],metaData.artist) #split to remove the "feat"/"remix" etc. look at readme.md
 	return info.lyrics
 
+# https://lyricsovh.docs.apiary.io/#reference/0/lyrics-of-a-song/search
+def get_lyrics_lyricsovh(song_path):
+	metadata = TinyTag.get(song_path)
+	song_title = urllib.parse.quote(metadata.title.strip().split("(")[0], safe="") ##.split("(")[0]  #split to remove the "feat"/"remix" etc. look at readme.md
+	song_artist = urllib.parse.quote(metadata.artist.split("&")[0].strip(), safe="") # # OVH seems to want just the main artist
+	dummy_url = "https://api.lyrics.ovh/v1/"+song_artist+"/"+song_title
+	res = requests.get(dummy_url)
+	if(res.status_code==200):
+		return res.json().get("lyrics")
+	else:
+		try: # if not found, try to seach it on genius.com
+			print("Lyrics OVH not found, trying on genius.com for: "+song_title, " by ", song_artist)
+			return get_lyrics_genius(song_path)
+		except Exception as e:
+			print("Lyrics missing for: ",song_title, " by ", song_artist)
+			return None
+
 
 #store the lyrics into song tag
 def store_lyrics2song(song_path, lyrics_text):
 	song_path = str(song_path)
-	dummy_ext=song_path[-4:].lower() #just the extension
+	dummy_ext= get_extension(song_path)
 	try:
 		if(dummy_ext == ".m4a"):
 			song = MP4(song_path)
@@ -75,7 +94,7 @@ def store_lyrics2song(song_path, lyrics_text):
 
 #DANGER: erase the lyrics of the songs
 def flushLyrics(song_path):
-	dummy_ext=song_path[-4:].lower() #just the extension
+	dummy_ext= get_extension(song_path)
 	try:
 		if(dummy_ext == ".m4a"):
 			song = MP4(song_path)
@@ -94,31 +113,60 @@ def flushLyrics(song_path):
 		print(e)
 		return [False,None]
 
+#return True if the song has already a lyrics (means has already a lyrics tag)
+def lyrics_already_exists(song_path):
+	dummy_ext= get_extension(song_path)
+	try:
+		if(dummy_ext == ".m4a"):
+			song = MP4(song_path)
+			if(song["©lyr"]!= None):
+				return True
+		elif(dummy_ext == ".flac" and song["LYRICS"]!= None):
+			song = FLAC(song_path)
+			if(song["LYRICS"]!= None):
+				return True
+		return False
+	except Exception as e:
+		#the lyrics tag doesn't exists
+		return False
+
+## return the extension of the file dot included (.flac/.m4a/.mp3)
+def get_extension(song_path):
+	return song_path[-4:].lower() #just the extension
+
 ########################################################################
 
 
 def add_lyrics_directory(folder_path):
 	register = load_register(folder_path)
-	print(register)
 
 	all_songs = list_songs(folder_path)
-	not_searched = list(set(all_songs) - set(register.get("lyrics_found")))
+	not_searched = list(set(str(s) for s in all_songs) - set(register.get("lyrics_found")))
 	for s in not_searched:
 		s_str = str(Path(s))
-		try:
-			dummy_lyrics = get_lyrics_genius(s)
-			storing_res = store_lyrics2song(s,dummy_lyrics)
-			register.get("counter")[storing_res[1][-3:]] += 1 # remove the dot from the extension
-			if(storing_res[0]):
-				register.get("lyrics_found").append(s_str)
-				print("Added successfully for: ",s_str)
-			else:
-				register.get("lyrics_missing").append(s_str)
-		except Exception as e:
-			print("ERROR PROCESSING: ",s_str," ~ ",e)
-			register.get("lyrics_missing").append(s_str)
+		if(not lyrics_already_exists(s)): ## if already present a Lyrics tag, skip
+			try:
+				dummy_lyrics = get_lyrics_lyricsovh(s)
+				if(dummy_lyrics != None):
+					storing_res = store_lyrics2song(s,dummy_lyrics)
+					register.get("counter")[storing_res[1][-3:]] += 1 # remove the dot from the extension
 
-	print(register)
+				if(dummy_lyrics != None and  len(dummy_lyrics)>1 and storing_res[0] and s_str not in register.get("lyrics_found")):
+					register.get("lyrics_found").append(s_str)
+					print("Added successfully for: ",s_str)
+					if(s_str in register.get("lyrics_missing")): # pop if missing, now found
+						register["lyrics_missing"].remove(s_str)
+
+				else:
+					if(s_str not in register.get("lyrics_missing")): # avoid duplication
+						register.get("lyrics_missing").append(s_str)
+			except Exception as e:
+				print("ERROR PROCESSING: ",s_str," ~ ",e)
+				register.get("lyrics_missing").append(s_str)
+		else: ## set as OK in the dicts, in order to avoid unuseful checks next time
+			register.get("lyrics_found").append(s_str)
+			register.get("counter")[get_extension(s)[-3:]] += 1 # remove the dot from the extension
+
 	store_register(register,folder_path)
 
 def flush_lyrics_directory(folder_path):
