@@ -53,7 +53,7 @@ def get_lyrics_genius(pathSong):
 # https://lyricsovh.docs.apiary.io/#reference/0/lyrics-of-a-song/search
 def get_lyrics_lyricsovh(song_path):
 	metadata = TinyTag.get(song_path)
-	song_title = urllib.parse.quote(metadata.title.strip().split("(")[0], safe="") ##.split("(")[0]  #split to remove the "feat"/"remix" etc. look at readme.md
+	song_title = urllib.parse.quote(metadata.title.split("(")[0].strip(), safe="") ##.split("(")[0]  #split to remove the "feat"/"remix" etc. look at readme.md
 	song_artist = urllib.parse.quote(metadata.artist.split("&")[0].strip(), safe="") # # OVH seems to want just the main artist
 	dummy_url = "https://api.lyrics.ovh/v1/"+song_artist+"/"+song_title
 	res = requests.get(dummy_url)
