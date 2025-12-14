@@ -167,6 +167,9 @@ def add_lyrics_directory(folder_path):
 			register.get("lyrics_found").append(s_str)
 			register.get("counter")[get_extension(s).replace(".","",)] += 1 # remove the dot from the extension
 
+	## consistency ~ remove potential duplicates
+	register["lyrics_found"] = list(set(register.get("lyrics_found")))
+	register["lyrics_missing"] = list(set(register.get("lyrics_missing")))
 	store_register(register,folder_path)
 
 def flush_lyrics_directory(folder_path):
