@@ -40,7 +40,6 @@ def load_register(folder_path):
 
 def list_songs(root):
     return [p for p in Path(root).rglob("*") if p.is_file() and p.suffix.lower() in SUPPORTED_EXTENSIONS]
-
 ########################################################################
 # GENIUS INTEGRATION AND FILE MANAGEMENT
 
@@ -92,6 +91,8 @@ def store_lyrics2song(song_path, lyrics_text):
 		elif(dummy_ext == ".mp3"):
 			song = ID3(song_path)
 			song["USLT::'eng'"] = (USLT(encoding=3, lang=u'eng', desc=u'desc', text=lyrics_text))
+			song["USLT::'eng'"] = (USLT(encoding=3, lang=u'eng', desc='', text=lyrics_text))
+			song["USLT"] = (USLT(encoding=3, lang=u'eng', desc='', text=lyrics_text))
 			song.save()
 		elif(dummy_ext == ".flac"):
 			song = FLAC(song_path)
@@ -149,17 +150,19 @@ def get_extension(song_path):
 ########################################################################
 
 
-def add_lyrics_directory(folder_path):
+def add_lyrics_directory(folder_path,force):
 	register = load_register(folder_path)
 
 	all_songs = list_songs(folder_path)
 	not_searched = list(set(str(s) for s in all_songs) - set(register.get("lyrics_found")))
 	for s in not_searched:
 		s_str = str(Path(s))
-		if(not lyrics_already_exists(s)): ## if already present a Lyrics tag, skip
+		print("force",force,lyrics_already_exists(s))
+		if(force and not lyrics_already_exists(s)): ## if already present a Lyrics tag, skip
 			try:
 				dummy_lyrics = get_lyrics_lyricsovh(s)
 				if(dummy_lyrics != None):
+					print(dummy_lyrics)
 					storing_res = store_lyrics2song(s,dummy_lyrics)
 					register.get("counter")[get_extension(s).replace(".","",)] += 1 # remove the dot from the extension
 
@@ -194,11 +197,12 @@ def flush_lyrics_directory(folder_path):
 ## LOGIC AND ALGORITHM
 def main():
 	if len(sys.argv) < 3:
-		print("Usage: python3 glyrics.py <Flush|Search> <FolderPath>")
+		print("Usage: python3 glyrics.py <Flush|Search> <FolderPath> <Force>")
 		return
 	else:
 		command = sys.argv[1].upper()
 		folder_path = sys.argv[2]
+		force = sys.argv[3] ## if force, the lyrics is retrieved even if present the tag in the song
 
 	match command.upper():
 		case "FLUSH":
@@ -206,7 +210,7 @@ def main():
 			if(str(input("DANGER: type 'suRe' if you're really sure \n this will be remove lyrics from indicated path! ")) == 'suRe'):
 				flush_lyrics_directory(folder_path)
 		case "SEARCH":
-			add_lyrics_directory(folder_path)
+			add_lyrics_directory(folder_path,force)
 		case _:
 			print("Unknown command")
 
