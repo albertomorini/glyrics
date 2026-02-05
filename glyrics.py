@@ -89,10 +89,20 @@ def store_lyrics2song(song_path, lyrics_text):
 			song["©lyr"] = lyrics_text
 			song.save()
 		elif(dummy_ext == ".mp3"):
-			song = ID3(song_path)
-			song["USLT::'eng'"] = (USLT(encoding=3, lang=u'eng', desc=u'desc', text=lyrics_text))
-			song["USLT::'eng'"] = (USLT(encoding=3, lang=u'eng', desc='', text=lyrics_text))
-			song["USLT"] = (USLT(encoding=3, lang=u'eng', desc='', text=lyrics_text))
+			# song = ID3(song_path)
+			# song["USLT::'eng'"] = (USLT(encoding=3, lang=u'eng', desc=u'desc', text=lyrics_text))
+			# song["USLT::'eng'"] = (USLT(encoding=3, lang=u'eng', desc='', text=lyrics_text))
+			# song["USLT"] = (USLT(encoding=3, lang=u'eng', desc='', text=lyrics_text))
+			song = MP3(song_path,ID3=ID3)
+			song.tags.delall("USLT") ## remove others lyrics tag
+			song.tags.add(
+				USLT(
+					encoding=3,          # UTF-8
+					lang="eng",           # ISO 639-2 language code
+					desc="Lyrics",        # description (glyrics-style)
+					text=lyrics_text
+				)
+			)
 			song.save()
 		elif(dummy_ext == ".flac"):
 			song = FLAC(song_path)
@@ -157,12 +167,10 @@ def add_lyrics_directory(folder_path,force):
 	not_searched = list(set(str(s) for s in all_songs) - set(register.get("lyrics_found")))
 	for s in not_searched:
 		s_str = str(Path(s))
-		print("force",force,lyrics_already_exists(s))
 		if(force and not lyrics_already_exists(s)): ## if already present a Lyrics tag, skip
 			try:
 				dummy_lyrics = get_lyrics_lyricsovh(s)
 				if(dummy_lyrics != None):
-					print(dummy_lyrics)
 					storing_res = store_lyrics2song(s,dummy_lyrics)
 					register.get("counter")[get_extension(s).replace(".","",)] += 1 # remove the dot from the extension
 
