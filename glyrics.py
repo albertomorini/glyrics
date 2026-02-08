@@ -18,7 +18,6 @@ SUPPORTED_EXTENSIONS = {".m4a", ".mp3", ".flac"}  # use a set for faster lookup
 APIkey_genius= open("./genius_APIKEY.txt","r").read()
 genius = genius.Genius(APIkey_genius,sleep_time=1)
 genius.skip_non_songs = False #we search also the songs without lyrics (eg soundtrack) in the way to mark them as founded (already searched).
-genius.remove_section_headers = True
 
 ########################################################################
 # UTILITY
