@@ -33,6 +33,20 @@ $ python3 glyrics.py mode "path"
 	- Recursive — scans all subfolders
 	- Example: /mnt/MEDIA/MUSIC/ or /myFavAritst/myFavAlbum
 
+### Optional flags
+
+- `--dry-run` — preview only: it prints what would be embedded/removed, without touching any song or `glyrics.json`
+  ```shell
+  $ python3 glyrics.py search "/mnt/MEDIA/MUSIC/" --dry-run
+  ```
+- **force** (3rd positional argument, default `true`):
+	- `true` — search the songs that don't have a lyrics tag yet
+	- `false` — only register them as searched, no API call
+  ```shell
+  $ python3 glyrics.py search "/mnt/MEDIA/MUSIC/" false
+  ```
+- `-h` / `--help` — show the full help
+
 
 ### main logic
 
@@ -65,11 +79,10 @@ In new version has been integrated in the search function in order to lay up API
 	....
 
 - Python3 with:
-	- os
-	- sys
 	- lyricsgenius
 	- tinytag
 	- mutagen
+	- requests
 
 <hr/>
 
